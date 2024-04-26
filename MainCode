@@ -1,0 +1,92 @@
+import pygame
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the screen dimensions
+screen_width = 800
+screen_height = 600
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("My Pet Skunk")
+
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+
+def loading_screen(screen):
+    # Loading progress
+    loading_progress = 0
+
+    # Main loop
+    while loading_progress <= 100:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # Clear the screen
+        screen.fill(BLACK)
+
+        # Draw loading text
+        font = pygame.font.SysFont(None, 36)
+        text = font.render("Loading...", True, WHITE)
+        text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2 - 50))
+        screen.blit(text, text_rect)
+
+        # Draw loading progress bar
+        pygame.draw.rect(screen, GREEN, (screen_width // 2 - 150, screen_height // 2, 300, 30))
+        pygame.draw.rect(screen, WHITE, (screen_width // 2 - 150, screen_height // 2, loading_progress * 3, 30))
+
+        # Update the display
+        pygame.display.flip()
+
+        # Simulate loading progress
+        loading_progress += 1
+        pygame.time.wait(20)  # Adjust the wait time for smoother progress bar animation
+
+def title_screen(screen):
+    # Clear the screen
+    screen.fill(BLACK)
+
+    # Draw title text
+    font = pygame.font.SysFont(None, 72)
+    text = font.render("My Pet Skunk", True, WHITE)
+    text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2 - 50))
+    screen.blit(text, text_rect)
+
+    # Draw start button
+    pygame.draw.rect(screen, GREEN, (screen_width // 2 - 100, screen_height // 2 + 50, 200, 50))
+    font = pygame.font.SysFont(None, 36)
+    text = font.render("Start", True, BLACK)
+    text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2 + 75))
+    screen.blit(text, text_rect)
+
+    # Update the display
+    pygame.display.flip()
+
+    # Wait for the player to click the start button
+    start_clicked = False
+    while not start_clicked:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if screen_width // 2 - 100 <= mouse_pos[0] <= screen_width // 2 + 100 \
+                        and screen_height // 2 + 50 <= mouse_pos[1] <= screen_height // 2 + 100:
+                    start_clicked = True
+
+# Display loading screen
+loading_screen(screen)
+
+# Display title screen
+title_screen(screen)
+
+# Your main game logic goes here...
+
+# Quit Pygame
+pygame.quit()
+sys.exit()
