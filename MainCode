@@ -153,10 +153,14 @@ def title_screen(screen, player_name):
                         stop_music()  # Stop the music
                         play_phone_ring()  # Play phone ringing sound
                         dialogue_lines = [
-                            f"Welcome, {player_name}!",
-                            "You have inherited a skunk from your aunt's will.",
-                            "She passed away recently, and now the skunk is yours.",
-                            "What will you do with your unexpected inheritance?"
+                            f"Hi, {player_name}, I have some news.",
+                            "Aunt Gertrude is dead.",
+                            "What do you mean, 'who's Aunt Gertrude?'",
+                            "Okay, well, she's dead. And she left you something in her will.",
+                            "No, it's not money...",
+                            "She left you her pet skunk, Breezy.  No, I'm not kidding.",
+                            "You need to go pick up Breezy right now. Take good care of him.",
+                            "Bye."
                         ]
                         display_dialogue(screen, dialogue_lines)
                         # After dialogue, load and display aunthouse.jpeg
@@ -200,16 +204,18 @@ def display_dialogue(screen, dialogue_lines):
     for line in dialogue_lines:
         displayed_text = ""
         for char in line:
+            # Render displayed text
+            displayed_text += char
+            text = font.render(displayed_text, True, WHITE)
+            text_rect = text.get_rect(left=100, top=y_position)
+
             # Clear the screen
             screen.fill(BLACK)
 
             # Draw speech bubble
             pygame.draw.rect(screen, WHITE, (50, y_position - 30, screen_width - 100, 60), 2)
 
-            # Render displayed text
-            displayed_text += char
-            text = font.render(displayed_text, True, WHITE)
-            text_rect = text.get_rect(left=100, top=y_position)
+            # Blit the text onto the screen
             screen.blit(text, text_rect)
 
             # Update the display
@@ -228,8 +234,6 @@ def display_dialogue(screen, dialogue_lines):
                 elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                     waiting = False
 
-        # Move to the next line
-        y_position -= 70
 
 # Display loading screen
 loading_screen(screen)
