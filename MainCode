@@ -51,6 +51,36 @@ class Skunk(pygame.sprite.Sprite):
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
 
+def aim_message(screen):
+    # Font settings
+    font = pygame.font.SysFont(None, 36)
+
+    # Message to be displayed
+    message = "The aim is"
+
+    # Calculate text size and position
+    text_surface = font.render(message, True, WHITE)
+    text_width, text_height = text_surface.get_size()
+    box_width = text_width + 20
+    box_height = text_height + 20
+    box_left = (screen_width - box_width) // 2
+    box_top = 50  # Adjusted to display the message at the top
+
+    # Create a surface for the message box
+    message_box_surface = pygame.Surface((box_width, box_height))
+    message_box_surface.fill(BLACK)
+
+    # Render the message onto the message box surface
+    message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
+
+    # Draw the message box onto the screen
+    pygame.draw.rect(screen, WHITE, (box_left, box_top, box_width, box_height), 2)
+    screen.blit(message_box_surface, (box_left, box_top))
+
+    # Update the display
+    pygame.display.flip()
+
+
 def loading_screen(screen):
     # Play music
     play_music()
@@ -272,10 +302,6 @@ def main():
     # Display loading screen
     aunthouse_displayed = loading_screen(screen)
 
-    # Load aunt's house image
-    aunthouse_image = pygame.image.load("aunthouse.jpeg")
-    aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
-
     # Start the main game loop
     if aunthouse_displayed:
         player_name = get_player_name(screen)
@@ -283,6 +309,11 @@ def main():
             clock = pygame.time.Clock()
             # Create the skunk NPC
             skunk = Skunk("pet_skunk.png", (screen_width // 2, screen_height // 2))
+            aim_message_displayed = False  # Flag to track if aim message is displayed
+
+            # Load aunt's house image and scale it to match screen dimensions
+            aunthouse_image = pygame.image.load("aunthouse.jpeg")
+            aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
 
             while True:
                 for event in pygame.event.get():
@@ -299,13 +330,20 @@ def main():
                 if aunthouse_displayed:
                     # Draw aunt's house background
                     screen.blit(aunthouse_image, (0, 0))
-                    # Define the aunt's house boundaries
-                    aunthouse_rect = pygame.Rect(0, 0, screen_width, screen_height)
                     # Update skunk movement
-                    skunk.update(aunthouse_rect)
+                    skunk.update(pygame.Rect(0, 0, screen_width, screen_height))
+
+                    # Check if the skunk has entered the aunt's house
+                    if skunk.rect.colliderect(pygame.Rect(0, 0, screen_width, screen_height)) and not aim_message_displayed:
+                        aim_message(screen)
+                        aim_message_displayed = True  # Set the flag to True once the aim message is displayed
 
                 # Draw everything
                 skunk.draw(screen)
+
+                # Display aim message on top of everything
+                if aim_message_displayed:
+                    aim_message(screen)
 
                 pygame.display.flip()
                 clock.tick(60)  # Limit frame rate
