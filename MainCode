@@ -272,6 +272,10 @@ def main():
     # Display loading screen
     aunthouse_displayed = loading_screen(screen)
 
+    # Load aunt's house image
+    aunthouse_image = pygame.image.load("aunthouse.jpeg")
+    aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
+
     # Start the main game loop
     if aunthouse_displayed:
         player_name = get_player_name(screen)
@@ -293,10 +297,10 @@ def main():
 
                 # Check if aunthouse_displayed is True
                 if aunthouse_displayed:
+                    # Draw aunt's house background
+                    screen.blit(aunthouse_image, (0, 0))
                     # Define the aunt's house boundaries
                     aunthouse_rect = pygame.Rect(0, 0, screen_width, screen_height)
-                    # Draw aunt's house background
-                    screen.blit(pygame.image.load("aunthouse.jpeg"), (0, 0))
                     # Update skunk movement
                     skunk.update(aunthouse_rect)
 
@@ -305,6 +309,7 @@ def main():
 
                 pygame.display.flip()
                 clock.tick(60)  # Limit frame rate
+
 
 def display_menu(screen, position):
     # Display menu options
