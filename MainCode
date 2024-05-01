@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 # Initialize Pygame
 pygame.init()
@@ -16,63 +17,39 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
-def play_music():
-    # Play background music
-    pygame.mixer.music.load("skunkmusic.mp3")
-    pygame.mixer.music.play(-1)  # Loop the music indefinitely
+# Skunk class
+class Skunk(pygame.sprite.Sprite):
+    def __init__(self, image, position):
+        super().__init__()
+        self.image = pygame.transform.scale(pygame.image.load(image), (50, 50))  # Resize skunk image
+        self.rect = self.image.get_rect(center=position)
+        self.position = position
+        self.speed = 2  # Adjust speed as needed
+        self.direction = random.choice(['up', 'down', 'left', 'right'])
 
-def stop_music():
-    pygame.mixer.music.stop()
+    def update(self, house_rect):
+        if self.direction == 'up':
+            self.rect.y -= self.speed
+            if self.rect.top < house_rect.top:
+                self.direction = 'down'
+        elif self.direction == 'down':
+            self.rect.y += self.speed
+            if self.rect.bottom > house_rect.bottom:
+                self.direction = 'up'
+        elif self.direction == 'left':
+            self.rect.x -= self.speed
+            if self.rect.left < house_rect.left:
+                self.direction = 'right'
+        elif self.direction == 'right':
+            self.rect.x += self.speed
+            if self.rect.right > house_rect.right:
+                self.direction = 'left'
 
-def play_phone_ring():
-    # Play phone ringing sound
-    pygame.mixer.Sound("phonering.mp3").play()
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
 
-def get_player_name(screen):
-    # Clear the screen
-    screen.fill(BLACK)
-
-    # Draw prompt text
-    font = pygame.font.SysFont(None, 36)
-    text = font.render("Enter your name:", True, WHITE)
-    text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2 - 50))
-    screen.blit(text, text_rect)
-
-    # Update the display
-    pygame.display.flip()
-
-    # Input loop
-    input_text = ""
-    input_rect = pygame.Rect(screen_width // 2 - 100, screen_height // 2, 200, 50)
-    active = True
-    while active:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    active = False
-                elif event.key == pygame.K_BACKSPACE:
-                    input_text = input_text[:-1]
-                else:
-                    input_text += event.unicode
-
-        # Clear the input area
-        pygame.draw.rect(screen, BLACK, input_rect)
-
-        # Render the input text
-        font = pygame.font.SysFont(None, 36)
-        text_surface = font.render(input_text, True, WHITE)
-        screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
-
-        # Draw input area rectangle
-        pygame.draw.rect(screen, WHITE, input_rect, 2)
-
-        # Update the display
-        pygame.display.flip()
-
-    return input_text
+    def is_clicked(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
 
 def loading_screen(screen):
     # Play music
@@ -108,9 +85,7 @@ def loading_screen(screen):
         loading_progress += 1
         pygame.time.wait(20)  # Adjust the wait time for smoother progress bar animation
 
-    # Once loading is complete, return control to the main part of the game
-    player_name = get_player_name(screen)
-    title_screen(screen, player_name)
+    return True
 
 
 def title_screen(screen, player_name):
@@ -163,9 +138,8 @@ def title_screen(screen, player_name):
                             "Bye."
                         ]
                         display_dialogue(screen, dialogue_lines)
-                        # After dialogue, load and display aunthouse.jpeg
-                        display_image(screen, "aunthouse.jpeg")
-                        return
+                        # Update aunthouse_displayed to True
+                        return True
                     elif screen_height // 2 + 75 <= mouse_pos[1] <= screen_height // 2 + 125:
                         # Quit button clicked
                         pygame.quit()
@@ -194,7 +168,6 @@ def display_image(screen, image_path):
                 sys.exit()
             elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 waiting = False
-
 
 def display_dialogue(screen, dialogue_lines):
     # Display dialogue lines with typewriter effect
@@ -234,6 +207,122 @@ def display_dialogue(screen, dialogue_lines):
                 elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                     waiting = False
 
+def play_phone_ring():
+    # Play phone ringing sound
+    pygame.mixer.Sound("phonering.mp3").play()
 
-# Display loading screen
-loading_screen(screen)
+def play_music():
+    # Play background music
+    pygame.mixer.music.load("skunkmusic.mp3")
+    pygame.mixer.music.play(-1)  # Loop the music indefinitely
+
+def stop_music():
+    pygame.mixer.music.stop()
+
+def get_player_name(screen):
+    # Clear the screen
+    screen.fill(BLACK)
+
+    # Draw prompt text
+    font = pygame.font.SysFont(None, 36)
+    text = font.render("Enter your name:", True, WHITE)
+    text_rect = text.get_rect(center=(screen_width // 2, screen_height // 2 - 50))
+    screen.blit(text, text_rect)
+
+    # Update the display
+    pygame.display.flip()
+
+    # Input loop
+    input_text = ""
+    input_rect = pygame.Rect(screen_width // 2 - 100, screen_height // 2, 200, 50)
+    active = True
+    while active:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    active = False
+                elif event.key == pygame.K_BACKSPACE:
+                    input_text = input_text[:-1]
+                else:
+                    input_text += event.unicode
+
+        # Clear the input area
+        pygame.draw.rect(screen, BLACK, input_rect)
+
+        # Render the input text
+        font = pygame.font.SysFont(None, 36)
+        text_surface = font.render(input_text, True, WHITE)
+        screen.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+
+        # Draw input area rectangle
+        pygame.draw.rect(screen, WHITE, input_rect, 2)
+
+        # Update the display
+        pygame.display.flip()
+
+    return input_text
+
+def main():
+    clock = pygame.time.Clock()
+    aunthouse_displayed = False
+
+    # Display loading screen
+    aunthouse_displayed = loading_screen(screen)
+
+    # Start the main game loop
+    if aunthouse_displayed:
+        player_name = get_player_name(screen)
+        if title_screen(screen, player_name):  # Check if player clicked "Start"
+            clock = pygame.time.Clock()
+            # Create the skunk NPC
+            skunk = Skunk("pet_skunk.png", (screen_width // 2, screen_height // 2))
+
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        mouse_pos = pygame.mouse.get_pos()
+                        if skunk.is_clicked(mouse_pos):
+                            # Skunk is clicked, display menu
+                            display_menu(screen, mouse_pos)
+
+                # Check if aunthouse_displayed is True
+                if aunthouse_displayed:
+                    # Define the aunt's house boundaries
+                    aunthouse_rect = pygame.Rect(0, 0, screen_width, screen_height)
+                    # Draw aunt's house background
+                    screen.blit(pygame.image.load("aunthouse.jpeg"), (0, 0))
+                    # Update skunk movement
+                    skunk.update(aunthouse_rect)
+
+                # Draw everything
+                skunk.draw(screen)
+
+                pygame.display.flip()
+                clock.tick(60)  # Limit frame rate
+
+def display_menu(screen, position):
+    # Display menu options
+    font = pygame.font.SysFont(None, 24)
+    menu_options = ["FEED", "PLAY", "CHECK STATS"]
+    menu_height = len(menu_options) * 30
+    menu_rect = pygame.Rect(position[0], position[1], 150, menu_height)
+
+    pygame.draw.rect(screen, WHITE, menu_rect)  # Draw menu background
+
+    # Draw menu options
+    for i, option in enumerate(menu_options):
+        text = font.render(option, True, BLACK)
+        text_rect = text.get_rect(center=(position[0] + 75, position[1] + i * 30 + 15))
+        screen.blit(text, text_rect)
+
+    pygame.display.flip()
+
+# Start the main game loop
+if __name__ == "__main__":
+    main()
