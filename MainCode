@@ -21,28 +21,30 @@ RED = (255, 0, 0)
 class Skunk(pygame.sprite.Sprite):
     def __init__(self, image, position):
         super().__init__()
-        self.image = pygame.transform.scale(pygame.image.load(image), (50, 50))  # Resize skunk image
+        self.original_image = pygame.transform.scale(pygame.image.load(image), (50, 50))  # Resize skunk image
+        self.image = self.original_image
         self.rect = self.image.get_rect(center=position)
         self.position = position
-        self.speed = 2  # Adjust speed as needed
-        self.direction = random.choice(['up', 'down', 'left', 'right'])
+        self.speed = 1  # Adjust speed as needed
+        self.direction = random.choice(['left', 'right'])
+        self.flipped = False  # Flag to indicate if the image is flipped
 
-    def update(self, house_rect):
-        if self.direction == 'up':
-            self.rect.y -= self.speed
-            if self.rect.top < house_rect.top:
-                self.direction = 'down'
-        elif self.direction == 'down':
-            self.rect.y += self.speed
-            if self.rect.bottom > house_rect.bottom:
-                self.direction = 'up'
-        elif self.direction == 'left':
-            self.rect.x -= self.speed
-            if self.rect.left < house_rect.left:
+    def update(self, boundaries_rect):
+        if self.direction == 'left':
+            if self.rect.left > boundaries_rect.left:
+                self.rect.x -= self.speed
+                if not self.flipped:  # Flip the image if it's not already flipped
+                    self.image = pygame.transform.flip(self.original_image, True, False)
+                    self.flipped = True
+            else:
                 self.direction = 'right'
         elif self.direction == 'right':
-            self.rect.x += self.speed
-            if self.rect.right > house_rect.right:
+            if self.rect.right < boundaries_rect.right:
+                self.rect.x += self.speed
+                if self.flipped:  # Unflip the image if it's flipped
+                    self.image = self.original_image
+                    self.flipped = False
+            else:
                 self.direction = 'left'
 
     def draw(self, screen):
@@ -50,6 +52,7 @@ class Skunk(pygame.sprite.Sprite):
 
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
+
 
 def aim_message(screen):
     # Font settings
@@ -298,6 +301,15 @@ def get_player_name(screen):
 def main():
     clock = pygame.time.Clock()
     aunthouse_displayed = False
+    # Load aunt's house background image and resize it to fit the screen
+    aunthouse_image = pygame.image.load("aunthouse.jpeg")
+    aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
+
+    # Define boundaries for skunk movement within the aunt's house
+    boundaries_rect = pygame.Rect(300, 330, 180, 250)
+
+    skunk = Skunk("pet_skunk.png", (random.randint(boundaries_rect.left, boundaries_rect.right), 
+                                random.randint(boundaries_rect.top, boundaries_rect.bottom)))
 
     # Display loading screen
     aunthouse_displayed = loading_screen(screen)
@@ -310,10 +322,6 @@ def main():
             # Create the skunk NPC
             skunk = Skunk("pet_skunk.png", (screen_width // 2, screen_height // 2))
             aim_message_displayed = False  # Flag to track if aim message is displayed
-
-            # Load aunt's house image and scale it to match screen dimensions
-            aunthouse_image = pygame.image.load("aunthouse.jpeg")
-            aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
 
             while True:
                 for event in pygame.event.get():
@@ -331,7 +339,7 @@ def main():
                     # Draw aunt's house background
                     screen.blit(aunthouse_image, (0, 0))
                     # Update skunk movement
-                    skunk.update(pygame.Rect(0, 0, screen_width, screen_height))
+                    skunk.update(boundaries_rect)
 
                     # Check if the skunk has entered the aunt's house
                     if skunk.rect.colliderect(pygame.Rect(0, 0, screen_width, screen_height)) and not aim_message_displayed:
