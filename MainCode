@@ -21,16 +21,18 @@ BROWN = (139, 69, 19)
 
 # Skunk class
 class Skunk(pygame.sprite.Sprite):
-    def __init__(self, image, position):
+    def __init__(self, image, screen_width):
         super().__init__()
         self.original_image = pygame.transform.scale(pygame.image.load(image), (50, 50))
         self.image = self.original_image
-        self.rect = self.image.get_rect(center=position)
-        self.position = position
+        self.rect = self.image.get_rect()
+        self.rect.centerx = screen_width // 2  # Center horizontally
+        self.rect.centery = 2 * screen_height // 3  # 2/3 down the screen
         self.speed = 1
-        self.direction = random.choice(['left', 'right'])
+        self.direction = 'left'  # Start moving to the left initially
         self.flipped = False
         self.moving = True  # Flag to control movement
+
 
     def update(self, boundaries_rect):
         if self.moving:
@@ -183,8 +185,7 @@ def main():
     aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
     boundaries_rect = pygame.Rect(300, 330, 180, 250)
 
-    skunk = Skunk("pet_skunk.png", (random.randint(boundaries_rect.left, boundaries_rect.right),
-                                random.randint(boundaries_rect.top, boundaries_rect.bottom)))
+    skunk = Skunk("pet_skunk.png", screen_width)
 
     menu_font = pygame.font.SysFont(None, 24)
     menu_displayed = False
@@ -443,67 +444,6 @@ def get_player_name(screen):
         pygame.display.flip()
 
     return input_text
-
-def main():
-    clock = pygame.time.Clock()
-
-    # Display loading screen
-    loading_screen(screen)
-
-    # Get player name
-    player_name = get_player_name(screen)
-
-    # Display title screen
-    title_screen(screen, player_name)
-
-    aunthouse_image = pygame.image.load("aunthouse.jpeg")
-    aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
-    boundaries_rect = pygame.Rect(300, 330, 180, 250)
-
-    skunk = Skunk("pet_skunk.png", (random.randint(boundaries_rect.left, boundaries_rect.right),
-                                random.randint(boundaries_rect.top, boundaries_rect.bottom)))
-
-    menu_font = pygame.font.SysFont(None, 24)
-    menu_displayed = False
-
-    aim_message_displayed = False  # Flag to keep track of aim message display
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if skunk.is_clicked(mouse_pos):
-                    # Skunk is clicked
-                    skunk.moving = False  # Stop skunk movement
-                    if not menu_displayed:
-                        print("Displaying menu")
-                        display_menu(screen, menu_font, mouse_pos)
-                        menu_displayed = True
-                    else:
-                        menu_displayed = False
-                        skunk.moving = True  # Resume skunk movement when menu is closed
-
-        screen.fill(BLACK)
-        screen.blit(aunthouse_image, (0, 0))
-
-        # Update skunk
-        skunk.update(boundaries_rect)
-        skunk.draw(screen)
-
-        # Display aim message if not already displayed
-        if not aim_message_displayed:
-            aim_message(screen)
-            aim_message_displayed = True
-
-        if menu_displayed:
-            display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery - 50))
-
-        pygame.display.flip()
-        clock.tick(60)
-
 
 
 
