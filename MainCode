@@ -61,7 +61,7 @@ class Skunk(pygame.sprite.Sprite):
 
 def aim_message(screen):
     # Font settings
-    font = pygame.font.SysFont(None, 36)
+    font = pygame.font.SysFont(None, 20)
 
     # Messages to be displayed
     breezy_message = "Meet Breezy."
@@ -88,7 +88,7 @@ def aim_message(screen):
                 typing_done = True
 
         displayed_text = current_message
-        text_surface = font.render(displayed_text, True, (BLACK))  # Brown color
+        text_surface = font.render(displayed_text, True, (WHITE))  # Brown color
         text_width, text_height = text_surface.get_size()
 
         # Render the message onto the message box surface
@@ -116,7 +116,7 @@ def aim_message(screen):
 
         displayed_text += current_message[0]
         current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (BLACK))  # Brown color
+        text_surface = font.render(displayed_text, True, (WHITE))  # Brown color
         text_width, text_height = text_surface.get_size()
 
         # Render the message onto the message box surface
@@ -132,6 +132,16 @@ def aim_message(screen):
 
         # Pause briefly to simulate typewriter effect
         pygame.time.wait(50)  # Adjust the wait time as needed
+        
+        if typing_done:
+            break  # Exit the loop if typing is done
+    
+    # Wait for a key press before transitioning to the third message
+    key_pressed = False
+    while not key_pressed:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                key_pressed = True
 
     # Typewriter effect for the third message
     current_message = third_message
@@ -143,7 +153,7 @@ def aim_message(screen):
 
         displayed_text += current_message[0]
         current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (BLACK))  # Brown color
+        text_surface = font.render(displayed_text, True, (WHITE))  # Brown color
         text_width, text_height = text_surface.get_size()
 
         # Render the message onto the message box surface
@@ -166,6 +176,7 @@ def aim_message(screen):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 key_pressed = True
+
 
 
 
@@ -227,8 +238,6 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
-
-
 
 
 def loading_screen(screen):
