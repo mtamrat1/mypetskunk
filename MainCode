@@ -61,7 +61,7 @@ class Skunk(pygame.sprite.Sprite):
 
 def aim_message(screen):
     # Font settings
-    font = pygame.font.SysFont(None, 20)
+    font = pygame.font.SysFont(None, 26)
 
     # Messages to be displayed
     breezy_message = "Meet Breezy. (press any key to continue)"
