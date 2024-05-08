@@ -64,7 +64,7 @@ def aim_message(screen):
     font = pygame.font.SysFont(None, 20)
 
     # Messages to be displayed
-    breezy_message = "Meet Breezy."
+    breezy_message = "Meet Breezy. (press any key to continue)"
     skunk_message = "He doesn't like you very much."
     third_message = "Figure out how to fix that."
 
