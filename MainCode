@@ -112,18 +112,6 @@ class Skunk(pygame.sprite.Sprite):
         if self.friendship > 100:
             self.friendship = 100  # Ensure friendship doesn't exceed 100
 
-def display_stats(screen, font, skunk):
-    stats_text = [
-        f"Happiness: {skunk.happiness}%",
-        f"Cleanliness: {skunk.cleanliness}%",
-        f"Health: {skunk.health}%",
-        f"Hunger: {skunk.hunger}%",
-        f"Friendship: {skunk.friendship}%"
-    ]
-    for i, stat in enumerate(stats_text):
-        text_surface = font.render(stat, True, WHITE)
-        text_rect = text_surface.get_rect(left=10, top=10 + i * 30)
-        screen.blit(text_surface, text_rect)
 
 def aim_message(screen):
     # Font settings
@@ -135,14 +123,14 @@ def aim_message(screen):
     third_message = "Figure out how to fix that."
 
     # Calculate text size and position
-    box_width = 500
-    box_height = 30
+    box_width = 400
+    box_height = 20
     box_left = (screen_width - box_width) // 2
-    box_top = 50  # Adjusted to display the message at the top
+    box_top = 70  # Adjusted to display the message at the top
 
     # Create a surface for the message box
     message_box_surface = pygame.Surface((box_width, box_height))
-    message_box_surface.fill(BROWN)
+    message_box_surface.fill((139, 69, 19))  # Brown color
 
     # Typewriter effect for the first message
     current_message = breezy_message
@@ -154,14 +142,14 @@ def aim_message(screen):
                 typing_done = True
 
         displayed_text = current_message
-        text_surface = font.render(displayed_text, True, (WHITE))  # Brown color
+        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
         text_width, text_height = text_surface.get_size()
 
         # Render the message onto the message box surface
         message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
 
-        # Draw the message box onto the screen
-        pygame.draw.rect(screen, WHITE, (box_left, box_top, box_width, box_height), 2)
+        # Draw the message box onto the screen with thicker border
+        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
         screen.blit(message_box_surface, (box_left, box_top))
 
         # Update the display
@@ -182,15 +170,15 @@ def aim_message(screen):
 
         displayed_text += current_message[0]
         current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (WHITE))  # Brown color
+        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
         text_width, text_height = text_surface.get_size()
 
         # Render the message onto the message box surface
-        message_box_surface.fill(BROWN)  # Change color to brown for skunk message
+        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
         message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
 
-        # Draw the message box onto the screen
-        pygame.draw.rect(screen, WHITE, (box_left, box_top, box_width, box_height), 2)
+        # Draw the message box onto the screen with thicker border
+        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
         screen.blit(message_box_surface, (box_left, box_top))
 
         # Update the display
@@ -219,15 +207,15 @@ def aim_message(screen):
 
         displayed_text += current_message[0]
         current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (WHITE))  # Brown color
+        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
         text_width, text_height = text_surface.get_size()
 
         # Render the message onto the message box surface
-        message_box_surface.fill(BROWN)  # Change color to brown for skunk message
+        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
         message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
 
-        # Draw the message box onto the screen
-        pygame.draw.rect(screen, WHITE, (box_left, box_top, box_width, box_height), 2)
+        # Draw the message box onto the screen with thicker border
+        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
         screen.blit(message_box_surface, (box_left, box_top))
 
         # Update the display
@@ -242,6 +230,7 @@ def aim_message(screen):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 key_pressed = True
+
 
 def main():
     clock = pygame.time.Clock()
@@ -537,6 +526,40 @@ def get_player_name(screen):
 
 
 
+def display_stats(screen, font, skunk):
+    stats_text = [
+        f"Happiness: {skunk.happiness}%",
+        f"Cleanliness: {skunk.cleanliness}%",
+        f"Health: {skunk.health}%",
+        f"Hunger: {skunk.hunger}%",
+        f"Friendship: {skunk.friendship}%"
+    ]
+    x = 70
+    y = 70  # Adjust the initial y position to move the box further down
+    y_spacing = 20  # Adjust spacing between stats
+    
+    # Calculate the dimensions of the brown box
+    box_width = 160
+    box_height = len(stats_text) * y_spacing + 10  # Adjust height based on number of stats
+    box_left = 65
+    box_top = 60
+
+    # Draw the dark brown border
+    border_rect = pygame.Rect(box_left, box_top, box_width, box_height)
+    pygame.draw.rect(screen, (60, 30, 10), border_rect, 3)  # Increased border thickness
+
+    # Draw the brown box
+    box_rect = pygame.Rect(box_left + 3, box_top + 3, box_width - 6, box_height - 6)  # Adjusted inner box position
+    pygame.draw.rect(screen, (139, 69, 19), box_rect)
+
+    # Display stats text in brighter tan color
+    tan_color = (240, 200, 160)  # Brighter tan color RGB values
+    for stat in stats_text:
+        text_surface = font.render(stat, True, tan_color)
+        text_rect = text_surface.get_rect(left=x, top=y)
+        screen.blit(text_surface, text_rect)
+        y += y_spacing  # Increment y position for the next stat
+
 def display_menu(screen, font, position):
     menu_options = ["FEED", "PLAY", "TALK", "STROKE", "BATHE"]  # Add "BATHE"
     menu_height = len(menu_options) * 30
@@ -562,6 +585,3 @@ def display_menu(screen, font, position):
 
     return menu_options, menu_rect  # Return menu options and menu rectangle
 
-
-if __name__ == "__main__":
-    main() 
