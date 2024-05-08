@@ -18,6 +18,7 @@ RED = (255, 0, 0)
 BROWN = (139, 69, 19) 
 
 
+# Skunk class
 class Skunk(pygame.sprite.Sprite):
     def __init__(self, image, screen_width):
         super().__init__()
@@ -31,6 +32,12 @@ class Skunk(pygame.sprite.Sprite):
         self.flipped = False
         self.moving = True  # Flag to control movement
         self.bathed = False  # Flag to track if skunk has been bathed
+        # Initialize stats
+        self.happiness = 0
+        self.cleanliness = 0
+        self.health = 50
+        self.hunger = 50
+        self.friendship = 0
 
     def update(self, boundaries_rect):
         if self.moving:
@@ -62,6 +69,61 @@ class Skunk(pygame.sprite.Sprite):
         # For example, change the appearance or reset any dirty state
         # For now, just toggle the bathed flag
         self.bathed = True
+        # Update cleanliness
+        self.cleanliness += 10  # Increment cleanliness by 10%
+
+    def feed(self):
+        # Feed the skunk
+        # Update hunger
+        self.hunger -= 10  # Decrease hunger by 10%
+        if self.hunger < 0:
+            self.hunger = 0  # Ensure hunger doesn't go below 0
+
+    def play(self):
+        # Play with the skunk
+        # Update happiness and friendship
+        self.happiness += 10  # Increase happiness by 10%
+        self.friendship += 10  # Increase friendship by 10%
+        if self.happiness > 100:
+            self.happiness = 100  # Ensure happiness doesn't exceed 100
+        if self.friendship > 100:
+            self.friendship = 100  # Ensure friendship doesn't exceed 100
+
+    def talk(self):
+        # Talk to the skunk
+        # Update happiness and friendship
+        self.happiness += 5  # Increase happiness by 5%
+        self.friendship += 5  # Increase friendship by 5%
+        if self.happiness > 100:
+            self.happiness = 100  # Ensure happiness doesn't exceed 100
+        if self.friendship > 100:
+            self.friendship = 100  # Ensure friendship doesn't exceed 100
+
+    def stroke(self):
+        # Stroke the skunk
+        # Update happiness, cleanliness, and friendship
+        self.happiness += 5  # Increase happiness by 5%
+        self.cleanliness += 5  # Increase cleanliness by 5%
+        self.friendship += 10  # Increase friendship by 10%
+        if self.happiness > 100:
+            self.happiness = 100  # Ensure happiness doesn't exceed 100
+        if self.cleanliness > 100:
+            self.cleanliness = 100  # Ensure cleanliness doesn't exceed 100
+        if self.friendship > 100:
+            self.friendship = 100  # Ensure friendship doesn't exceed 100
+
+def display_stats(screen, font, skunk):
+    stats_text = [
+        f"Happiness: {skunk.happiness}%",
+        f"Cleanliness: {skunk.cleanliness}%",
+        f"Health: {skunk.health}%",
+        f"Hunger: {skunk.hunger}%",
+        f"Friendship: {skunk.friendship}%"
+    ]
+    for i, stat in enumerate(stats_text):
+        text_surface = font.render(stat, True, WHITE)
+        text_rect = text_surface.get_rect(left=10, top=10 + i * 30)
+        screen.blit(text_surface, text_rect)
 
 def aim_message(screen):
     # Font settings
@@ -228,6 +290,14 @@ def main():
                         selected_option = menu_options[selected_option_index]
                         if selected_option == "BATHE":
                             skunk.bathe()  # Bathe the skunk
+                        elif selected_option == "FEED":
+                            skunk.feed()  # Feed the skunk
+                        elif selected_option == "PLAY":
+                            skunk.play()  # Play with the skunk
+                        elif selected_option == "TALK":
+                            skunk.talk()  # Talk to the skunk
+                        elif selected_option == "STROKE":
+                            skunk.stroke()  # Stroke the skunk
 
         screen.fill(BLACK)
         screen.blit(aunthouse_image, (0, 0))
@@ -243,6 +313,9 @@ def main():
 
         if menu_displayed:
             display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery - 50))
+
+        # Display stats
+        display_stats(screen, menu_font, skunk)
 
         pygame.display.flip()
         clock.tick(60)
