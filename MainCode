@@ -135,8 +135,8 @@ def aim_message(screen):
     third_message = "Figure out how to fix that."
 
     # Calculate text size and position
-    box_width = 600
-    box_height = 60
+    box_width = 500
+    box_height = 30
     box_left = (screen_width - box_width) // 2
     box_top = 50  # Adjusted to display the message at the top
 
