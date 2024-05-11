@@ -32,12 +32,13 @@ class Skunk(pygame.sprite.Sprite):
         self.flipped = False
         self.moving = True  # Flag to control movement
         self.bathed = False  # Flag to track if skunk has been bathed
-        # Initialize stats
+        # Initialize stats to 0
         self.happiness = 0
         self.cleanliness = 0
-        self.health = 50
-        self.hunger = 50
+        self.health = 100
+        self.hunger = 100
         self.friendship = 0
+
 
     def update(self, boundaries_rect):
         if self.moving:
@@ -63,54 +64,74 @@ class Skunk(pygame.sprite.Sprite):
 
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
-
+    
     def bathe(self):
-        # Bathe the skunk
-        # For example, change the appearance or reset any dirty state
-        # For now, just toggle the bathed flag
+    # Bathe the skunk
+    # For now, just toggle the bathed flag
         self.bathed = True
         # Update cleanliness
-        self.cleanliness += 10  # Increment cleanliness by 10%
+        self.cleanliness += 4  # Increment cleanliness by 10%
+        self.health += 4
 
-    def feed(self):
-        # Feed the skunk
-        # Update hunger
-        self.hunger -= 10  # Decrease hunger by 10%
-        if self.hunger < 0:
-            self.hunger = 0  # Ensure hunger doesn't go below 0
+        if self.cleanliness > 100:
+            self.cleanliness = 100  # Ensure cleanliness doesn't exceed 100
+        if self.health >100:
+            self.health = 100
 
-    def play(self):
-        # Play with the skunk
-        # Update happiness and friendship
-        self.happiness += 10  # Increase happiness by 10%
-        self.friendship += 10  # Increase friendship by 10%
+    def stroke(self):
+    # Stroke the skunk
+    # Update happiness, cleanliness, and friendship
+        self.happiness += 4  # Increase happiness by 5%
+        self.cleanliness -= 4  # decreae cleanliness by 5%
+        self.friendship += 4  # Increase friendship by 10%
+        
         if self.happiness > 100:
             self.happiness = 100  # Ensure happiness doesn't exceed 100
+        if self.cleanliness < 0:
+            self.cleanliness = 0  # Ensure cleanliness doesn't exceed 0
         if self.friendship > 100:
             self.friendship = 100  # Ensure friendship doesn't exceed 100
 
+    def feed(self):
+    # Feed the skunk
+    # Update hunger and cleanliness
+    
+        self.hunger -= 4
+        # Ensure hunger doesn't go below 0
+        
+        
+        
+        self.hunger = max(self.hunger,0)
+        # Ensure hunger and cleanliness don't exceed 100
+        self.hunger = min(self.hunger, 100)
+        self.cleanliness = min(self.cleanliness, 100)
+        
+
+    def play(self):
+    # Play with the skunk
+    # Update happiness, friendship, and cleanliness
+        self.happiness += 4  # Increase happiness by 10%
+        self.friendship += 4  # Increase friendship by 10%
+        self.cleanliness -= 4  # Decrease cleanliness by 10%
+        
+
+        
+        # Ensure attributes don't exceed 100
+        self.happiness = min(self.happiness, 100)
+        self.friendship = min(self.friendship, 100)
+        self.cleanliness = max(self.cleanliness, 0)  # Ensure cleanliness doesn't go below 0
+    
     def talk(self):
         # Talk to the skunk
         # Update happiness and friendship
-        self.happiness += 5  # Increase happiness by 5%
-        self.friendship += 5  # Increase friendship by 5%
+        self.happiness += 4  # Increase happiness by 5%
+        self.friendship += 4  # Increase friendship by 5%
+        # Ensure happiness and friendship don't exceed 100
         if self.happiness > 100:
-            self.happiness = 100  # Ensure happiness doesn't exceed 100
+            self.happiness = 100
         if self.friendship > 100:
-            self.friendship = 100  # Ensure friendship doesn't exceed 100
+            self.friendship = 100   
 
-    def stroke(self):
-        # Stroke the skunk
-        # Update happiness, cleanliness, and friendship
-        self.happiness += 5  # Increase happiness by 5%
-        self.cleanliness += 5  # Increase cleanliness by 5%
-        self.friendship += 10  # Increase friendship by 10%
-        if self.happiness > 100:
-            self.happiness = 100  # Ensure happiness doesn't exceed 100
-        if self.cleanliness > 100:
-            self.cleanliness = 100  # Ensure cleanliness doesn't exceed 100
-        if self.friendship > 100:
-            self.friendship = 100  # Ensure friendship doesn't exceed 100
 
 
 def aim_message(screen):
@@ -255,7 +276,30 @@ def main():
 
     aim_message_displayed = False  # Flag to keep track of aim message display
 
+    last_stat_update_time = pygame.time.get_ticks()  # Track the last time stats were updated
+
     while True:
+        current_time = pygame.time.get_ticks()
+
+        # Check if it's time to update the stats (every 4 seconds)
+        if current_time - last_stat_update_time >= 4000:
+            # Update the stats
+            skunk.happiness -= 5
+            skunk.cleanliness -= 5
+            skunk.health -= 5
+            skunk.hunger -= 5
+            skunk.friendship -= 5
+
+            # Ensure stats don't go below 0
+            skunk.happiness = max(skunk.happiness, 0)
+            skunk.cleanliness = max(skunk.cleanliness, 0)
+            skunk.health = max(skunk.health, 0)
+            skunk.hunger = max(skunk.hunger, 0)
+            skunk.friendship = max(skunk.friendship, 0)
+
+            # Update the last stat update time
+            last_stat_update_time = current_time
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -308,6 +352,7 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
+
 
 
 
@@ -553,6 +598,8 @@ def display_stats(screen, font, skunk):
 
     # Display stats text in brighter tan color
     tan_color = (240, 200, 160)  # Brighter tan color RGB values
+
+
     y = 70  # Initial y position
     for stat in stats_text:
         text_surface = font.render(stat, True, tan_color)
@@ -562,7 +609,7 @@ def display_stats(screen, font, skunk):
 
 
 def display_menu(screen, font, position):
-    menu_options = ["FEED", "PLAY", "TALK", "STROKE", "BATHE"]  # Add "BATHE"
+    menu_options = ["PLAY", "BATHE", "STROKE", "FEED", "TALK"]  # Corrected order
     menu_height = len(menu_options) * 30
     menu_width = 150
     menu_rect = pygame.Rect(0, 0, menu_width, menu_height)
@@ -581,6 +628,8 @@ def display_menu(screen, font, position):
         text = font.render(option, True, BLACK)
         text_rect = text.get_rect(center=(menu_rect.centerx, menu_rect.top + i * 30 + 15))
         screen.blit(text, text_rect)
+
+#play, 
 
     return menu_options, menu_rect  # Return menu options and menu rectangle
 
