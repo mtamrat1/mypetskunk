@@ -17,7 +17,6 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BROWN = (139, 69, 19) 
 
-
 # Skunk class
 class Skunk(pygame.sprite.Sprite):
     def __init__(self, image, screen_width):
@@ -65,197 +64,69 @@ class Skunk(pygame.sprite.Sprite):
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
     
-    def bathe(self):
-    # Bathe the skunk
-    # For now, just toggle the bathed flag
-        self.bathed = True
-        # Update cleanliness
-        self.cleanliness += 4  # Increment cleanliness by 10%
-        self.health += 4
-
-        if self.cleanliness > 100:
-            self.cleanliness = 100  # Ensure cleanliness doesn't exceed 100
-        if self.health >100:
-            self.health = 100
-
-    def stroke(self):
-    # Stroke the skunk
-    # Update happiness, cleanliness, and friendship
-        self.happiness += 4  # Increase happiness by 5%
-        self.cleanliness -= 4  # decreae cleanliness by 5%
-        self.friendship += 4  # Increase friendship by 10%
-        
-        if self.happiness > 100:
-            self.happiness = 100  # Ensure happiness doesn't exceed 100
-        if self.cleanliness < 0:
-            self.cleanliness = 0  # Ensure cleanliness doesn't exceed 0
-        if self.friendship > 100:
-            self.friendship = 100  # Ensure friendship doesn't exceed 100
-
     def feed(self):
-    # Feed the skunk
-    # Update hunger and cleanliness
+        # Feed the skunk
+        # Update hunger and cleanliness
+        self.hunger -= 4  # Decrease hunger by 4%
+        self.cleanliness -= 4  # Decrease cleanliness by 4%
+        self.health += 4  # Increase health by 4%
+        
+        # Ensure hunger and cleanliness don't go below 0
+        self.hunger = max(self.hunger, 0)
+        self.cleanliness = max(self.cleanliness, 0)
+        self.health = min(self.health, 100)
     
-        self.hunger -= 4
-        # Ensure hunger doesn't go below 0
-        
-        
-        
-        self.hunger = max(self.hunger,0)
-        # Ensure hunger and cleanliness don't exceed 100
-        self.hunger = min(self.hunger, 100)
-        self.cleanliness = min(self.cleanliness, 100)
-        
-
     def play(self):
-    # Play with the skunk
-    # Update happiness, friendship, and cleanliness
-        self.happiness += 4  # Increase happiness by 10%
-        self.friendship += 4  # Increase friendship by 10%
-        self.cleanliness -= 4  # Decrease cleanliness by 10%
+        # Play with the skunk
+        # Update happiness, friendship, and cleanliness
+        self.happiness += 4  # Increase happiness by 4%
+        self.friendship += 4  # Increase friendship by 4%
+        self.cleanliness -= 4  # Decrease cleanliness by 4%
+        self.health += 4  # Increase health by 4%
         
-
-        
-        # Ensure attributes don't exceed 100
+        # Ensure attributes don't exceed 100 or go below 0
         self.happiness = min(self.happiness, 100)
         self.friendship = min(self.friendship, 100)
-        self.cleanliness = max(self.cleanliness, 0)  # Ensure cleanliness doesn't go below 0
+        self.cleanliness = max(self.cleanliness, 0)
+        self.health = min(self.health, 100)
     
     def talk(self):
         # Talk to the skunk
         # Update happiness and friendship
-        self.happiness += 4  # Increase happiness by 5%
-        self.friendship += 4  # Increase friendship by 5%
-        # Ensure happiness and friendship don't exceed 100
-        if self.happiness > 100:
-            self.happiness = 100
-        if self.friendship > 100:
-            self.friendship = 100   
-
-
-
-def aim_message(screen):
-    # Font settings
-    font = pygame.font.SysFont(None, 26)
-
-    # Messages to be displayed
-    breezy_message = "Meet Breezy. (press any key to continue)"
-    skunk_message = "He doesn't like you very much."
-    third_message = "Figure out how to fix that."
-
-    # Calculate text size and position
-    box_width = 400
-    box_height = 20
-    box_left = (screen_width - box_width) // 2
-    box_top = 70  # Adjusted to display the message at the top
-
-    # Create a surface for the message box
-    message_box_surface = pygame.Surface((box_width, box_height))
-    message_box_surface.fill((139, 69, 19))  # Brown color
-
-    # Typewriter effect for the first message
-    current_message = breezy_message
-    typing_done = False
-    displayed_text = ""
-    while not typing_done:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                typing_done = True
-
-        displayed_text = current_message
-        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
-        text_width, text_height = text_surface.get_size()
-
-        # Render the message onto the message box surface
-        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
-
-        # Draw the message box onto the screen with thicker border
-        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
-        screen.blit(message_box_surface, (box_left, box_top))
-
-        # Update the display
-        pygame.display.flip()
-
-        # Pause briefly to simulate typewriter effect
-        pygame.time.wait(50)  # Adjust the wait time as needed
-
-    # Typewriter effect for the second message
-    current_message = skunk_message
-    displayed_text = ""
-    typing_done = False
-    
-    while current_message:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                typing_done = True  # Exit function when a key is pressed
-
-        displayed_text += current_message[0]
-        current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
-        text_width, text_height = text_surface.get_size()
-
-        # Render the message onto the message box surface
-        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
-        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
-
-        # Draw the message box onto the screen with thicker border
-        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
-        screen.blit(message_box_surface, (box_left, box_top))
-
-        # Update the display
-        pygame.display.flip()
-
-        # Pause briefly to simulate typewriter effect
-        pygame.time.wait(50)  # Adjust the wait time as needed
+        self.happiness += 4  # Increase happiness by 4%
+        self.friendship += 4  # Increase friendship by 4%
         
-        if typing_done:
-            break  # Exit the loop if typing is done
+        # Ensure happiness and friendship don't exceed 100
+        self.happiness = min(self.happiness, 100)
+        self.friendship = min(self.friendship, 100)
     
-    # Wait for a key press before transitioning to the third message
-    key_pressed = False
-    while not key_pressed:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                key_pressed = True
+    def stroke(self):
+        # Stroke the skunk
+        # Update happiness, cleanliness, and friendship
+        self.happiness += 4  # Increase happiness by 4%
+        self.cleanliness -= 4  # Decrease cleanliness by 4%
+        self.friendship += 4  # Increase friendship by 4%
+        
+        # Ensure attributes don't exceed 100 or go below 0
+        self.happiness = min(self.happiness, 100)
+        self.cleanliness = max(self.cleanliness, 0)
+        self.friendship = min(self.friendship, 100)
+        
+    def bathe(self):
+    # Bathe the skunk
+    # Update cleanliness and health
+        self.cleanliness += 4  # Increase cleanliness by 4%
+        self.health += 4  # Increase health by 4%
+        
+        # Ensure cleanliness and health don't exceed 100
+        self.cleanliness = min(self.cleanliness, 100)
+        self.health = min(self.health, 100)
 
-    # Typewriter effect for the third message
-    current_message = third_message
-    displayed_text = ""
-    while current_message:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                return  # Exit function when a key is pressed
-
-        displayed_text += current_message[0]
-        current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
-        text_width, text_height = text_surface.get_size()
-
-        # Render the message onto the message box surface
-        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
-        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
-
-        # Draw the message box onto the screen with thicker border
-        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
-        screen.blit(message_box_surface, (box_left, box_top))
-
-        # Update the display
-        pygame.display.flip()
-
-        # Pause briefly to simulate typewriter effect
-        pygame.time.wait(50)  # Adjust the wait time as needed
-
-    # Wait for a key press before the function exits
-    key_pressed = False
-    while not key_pressed:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                key_pressed = True
 
 
 def main():
     clock = pygame.time.Clock()
-
+    
     # Display loading screen
     loading_screen(screen)
 
@@ -273,8 +144,6 @@ def main():
 
     menu_font = pygame.font.SysFont(None, 24)
     menu_displayed = False
-
-    aim_message_displayed = False  # Flag to keep track of aim message display
 
     last_stat_update_time = pygame.time.get_ticks()  # Track the last time stats were updated
 
@@ -300,6 +169,7 @@ def main():
             # Update the last stat update time
             last_stat_update_time = current_time
 
+                # Inside the main loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -339,13 +209,8 @@ def main():
         skunk.update(boundaries_rect)
         skunk.draw(screen)
 
-        # Display aim message if not already displayed
-        if not aim_message_displayed:
-            aim_message(screen)
-            aim_message_displayed = True
-
         if menu_displayed:
-            display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery - 50))
+            display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery))
 
         # Update the display of stats
         display_stats(screen, menu_font, skunk)
@@ -353,9 +218,29 @@ def main():
         pygame.display.flip()
         clock.tick(60)
 
+def display_menu(screen, font, position):
+    menu_options = ["TALK", "FEED", "PLAY", "BATHE", "STROKE"]
 
+    menu_height = len(menu_options) * 30
+    menu_width = 150
+    menu_rect = pygame.Rect(0, 0, menu_width, menu_height)
 
+    # Offset the menu position from the skunk's position
+    menu_rect.centerx = position[0] + 25  # Offset horizontally
+    menu_rect.centery = (position[1] - menu_height // 2) - 50  # Offset vertically
 
+    # Draw semi-transparent white background for the menu
+    menu_surface = pygame.Surface((menu_width, menu_height))
+    menu_surface.set_alpha(200)  # Set transparency (0-255)
+    menu_surface.fill(WHITE)
+    screen.blit(menu_surface, menu_rect)
+
+    for i, option in enumerate(menu_options):
+        text = font.render(option, True, BLACK)
+        text_rect = text.get_rect(center=(menu_rect.centerx, menu_rect.top + i * 30 + 15))
+        screen.blit(text, text_rect)
+
+    return menu_options, menu_rect  # Return menu options and menu rectangle
 
 def loading_screen(screen):
     # Play music
@@ -450,31 +335,7 @@ def title_screen(screen, player_name):
                         # Quit button clicked
                         pygame.quit()
                         sys.exit()
-
-def display_image(screen, image_path):
-    # Load image
-    image = pygame.image.load(image_path)
-    image_rect = image.get_rect()
-
-    # Center the image on the screen
-    image_rect.center = (screen_width // 2, screen_height // 2)
-
-    # Display the image
-    screen.blit(image, image_rect)
-
-    # Update the display
-    pygame.display.flip()
-
-    # Wait for a key press or mouse click to continue
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                waiting = False
-
+                        
 def display_dialogue(screen, dialogue_lines):
     # Display dialogue lines with typewriter effect
     font = pygame.font.SysFont(None, 24)
@@ -512,6 +373,7 @@ def display_dialogue(screen, dialogue_lines):
                     sys.exit()
                 elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                     waiting = False
+
 
 def play_phone_ring():
     # Play phone ringing sound
@@ -572,6 +434,7 @@ def get_player_name(screen):
     return input_text
 
 
+
 def display_stats(screen, font, skunk):
     # Define the stats text
     stats_text = [
@@ -608,33 +471,5 @@ def display_stats(screen, font, skunk):
         y += 20  # Increment y position for the next stat
 
 
-def display_menu(screen, font, position):
-    menu_options = ["PLAY", "BATHE", "STROKE", "FEED", "TALK"]  # Corrected order
-    menu_height = len(menu_options) * 30
-    menu_width = 150
-    menu_rect = pygame.Rect(0, 0, menu_width, menu_height)
-
-    # Offset the menu position from the skunk's position
-    menu_rect.centerx = position[0] + 25  # Offset horizontally
-    menu_rect.centery = position[1] - menu_height // 2  # Offset vertically
-
-    # Draw semi-transparent white background for the menu
-    menu_surface = pygame.Surface((menu_width, menu_height))
-    menu_surface.set_alpha(200)  # Set transparency (0-255)
-    menu_surface.fill(WHITE)
-    screen.blit(menu_surface, menu_rect)
-
-    for i, option in enumerate(menu_options):
-        text = font.render(option, True, BLACK)
-        text_rect = text.get_rect(center=(menu_rect.centerx, menu_rect.top + i * 30 + 15))
-        screen.blit(text, text_rect)
-
-#play, 
-
-    return menu_options, menu_rect  # Return menu options and menu rectangle
-
-
-
-
 if __name__ == "__main__":
-    main() 
+    main()
