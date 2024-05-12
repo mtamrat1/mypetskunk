@@ -124,6 +124,101 @@ class Skunk(pygame.sprite.Sprite):
 
 
 
+def aim_message(screen):
+    # Font settings
+    font = pygame.font.SysFont(None, 26)
+    # Messages to be displayed
+    breezy_message = "Meet Breezy. (press any key to continue)"
+    skunk_message = "He doesn't like you very much."
+    third_message = "Figure out how to fix that."
+    # Calculate text size and position
+    box_width = 400
+    box_height = 20
+    box_left = (screen_width - box_width) // 2
+    box_top = 70  # Adjusted to display the message at the top
+    # Create a surface for the message box
+    message_box_surface = pygame.Surface((box_width, box_height))
+    message_box_surface.fill((139, 69, 19))  # Brown color
+    # Typewriter effect for the first message
+    current_message = breezy_message
+    typing_done = False
+    displayed_text = ""
+    while not typing_done:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                typing_done = True
+        displayed_text = current_message
+        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
+        text_width, text_height = text_surface.get_size()
+        # Render the message onto the message box surface
+        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
+        # Draw the message box onto the screen with thicker border
+        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
+        screen.blit(message_box_surface, (box_left, box_top))
+        # Update the display
+        pygame.display.flip()
+        # Pause briefly to simulate typewriter effect
+        pygame.time.wait(50)  # Adjust the wait time as needed
+    # Typewriter effect for the second message
+    current_message = skunk_message
+    displayed_text = ""
+    typing_done = False
+    
+    while current_message:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                typing_done = True  # Exit function when a key is pressed
+        displayed_text += current_message[0]
+        current_message = current_message[1:]
+        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
+        text_width, text_height = text_surface.get_size()
+        # Render the message onto the message box surface
+        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
+        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
+        # Draw the message box onto the screen with thicker border
+        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
+        screen.blit(message_box_surface, (box_left, box_top))
+        # Update the display
+        pygame.display.flip()
+        # Pause briefly to simulate typewriter effect
+        pygame.time.wait(50)  # Adjust the wait time as needed
+        
+        if typing_done:
+            break  # Exit the loop if typing is done
+    
+    # Wait for a key press before transitioning to the third message
+    key_pressed = False
+    while not key_pressed:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                key_pressed = True
+    # Typewriter effect for the third message
+    current_message = third_message
+    displayed_text = ""
+    while current_message:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                return  # Exit function when a key is pressed
+        displayed_text += current_message[0]
+        current_message = current_message[1:]
+        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
+        text_width, text_height = text_surface.get_size()
+        # Render the message onto the message box surface
+        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
+        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
+        # Draw the message box onto the screen with thicker border
+        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
+        screen.blit(message_box_surface, (box_left, box_top))
+        # Update the display
+        pygame.display.flip()
+        # Pause briefly to simulate typewriter effect
+        pygame.time.wait(50)  # Adjust the wait time as needed
+    # Wait for a key press before the function exits
+    key_pressed = False
+    while not key_pressed:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                key_pressed = True
 def main():
     clock = pygame.time.Clock()
     
@@ -144,6 +239,8 @@ def main():
 
     menu_font = pygame.font.SysFont(None, 24)
     menu_displayed = False
+    
+    aim_message_displayed = False  # Flag to keep track of aim message display
 
     last_stat_update_time = pygame.time.get_ticks()  # Track the last time stats were updated
 
@@ -151,7 +248,7 @@ def main():
         current_time = pygame.time.get_ticks()
 
         # Check if it's time to update the stats (every 4 seconds)
-        if current_time - last_stat_update_time >= 4000:
+        if current_time - last_stat_update_time >= 1000:
             # Update the stats
             skunk.happiness -= 5
             skunk.cleanliness -= 5
@@ -204,10 +301,21 @@ def main():
 
         screen.fill(BLACK)
         screen.blit(aunthouse_image, (0, 0))
+        
+        skunk.update(boundaries_rect)
+        skunk.draw(screen)
+        
+        if not aim_message_displayed:
+            aim_message(screen)
+            aim_message_displayed = True
 
         # Update skunk
         skunk.update(boundaries_rect)
         skunk.draw(screen)
+        
+        if not aim_message_displayed:
+            aim_message(screen)
+            aim_message_displayed = True
 
         if menu_displayed:
             display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery))
