@@ -1,0 +1,276 @@
+import pygame
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the screen dimensions
+screen_width = 800
+screen_height = 600
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("My Pet Skunk")
+
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BROWN = (139, 69, 19) 
+
+# Skunk class
+class Skunk(pygame.sprite.Sprite):
+    def __init__(self, image, screen_width):
+        super().__init__()
+        self.original_image = pygame.transform.scale(pygame.image.load(image), (50, 50))
+        self.image = self.original_image
+        self.rect = self.image.get_rect()
+        self.rect.centerx = screen_width // 2  # Center horizontally
+        self.rect.centery = 2 * screen_height // 3  # 2/3 down the screen
+        self.speed = 1
+        self.direction = 'left'  # Start moving to the left initially
+        self.flipped = False
+        self.moving = True  # Flag to control movement
+        self.bathed = False  # Flag to track if skunk has been bathed
+        # Initialize stats to 0
+        self.happiness = 0
+        self.cleanliness = 0
+        self.health = 100
+        self.hunger = 100
+        self.friendship = 0
+
+
+    def update(self, boundaries_rect):
+        if self.moving:
+            if self.direction == 'left':
+                if self.rect.left > boundaries_rect.left:
+                    self.rect.x -= self.speed
+                    if not self.flipped:
+                        self.image = pygame.transform.flip(self.original_image, True, False)
+                        self.flipped = True
+                else:
+                    self.direction = 'right'
+            elif self.direction == 'right':
+                if self.rect.right < boundaries_rect.right:
+                    self.rect.x += self.speed
+                    if self.flipped:
+                        self.image = self.original_image
+                        self.flipped = False
+                else:
+                    self.direction = 'left'
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+    def is_clicked(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
+    
+    def feed(self):
+        # Feed the skunk
+        # Update hunger and cleanliness
+        self.hunger -= 4  # Decrease hunger by 4%
+        self.cleanliness -= 4  # Decrease cleanliness by 4%
+        self.health += 4  # Increase health by 4%
+        
+        # Ensure hunger and cleanliness don't go below 0
+        self.hunger = max(self.hunger, 0)
+        self.cleanliness = max(self.cleanliness, 0)
+        self.health = min(self.health, 100)
+    
+    def play(self):
+        # Play with the skunk
+        # Update happiness, friendship, and cleanliness
+        self.happiness += 4  # Increase happiness by 4%
+        self.friendship += 4  # Increase friendship by 4%
+        self.cleanliness -= 4  # Decrease cleanliness by 4%
+        self.health += 4  # Increase health by 4%
+        
+        # Ensure attributes don't exceed 100 or go below 0
+        self.happiness = min(self.happiness, 100)
+        self.friendship = min(self.friendship, 100)
+        self.cleanliness = max(self.cleanliness, 0)
+        self.health = min(self.health, 100)
+    
+    def talk(self):
+        # Talk to the skunk
+        # Update happiness and friendship
+        self.happiness += 4  # Increase happiness by 4%
+        self.friendship += 4  # Increase friendship by 4%
+        
+        # Ensure happiness and friendship don't exceed 100
+        self.happiness = min(self.happiness, 100)
+        self.friendship = min(self.friendship, 100)
+    
+    def stroke(self):
+        # Stroke the skunk
+        # Update happiness, cleanliness, and friendship
+        self.happiness += 4  # Increase happiness by 4%
+        self.cleanliness -= 4  # Decrease cleanliness by 4%
+        self.friendship += 4  # Increase friendship by 4%
+        
+        # Ensure attributes don't exceed 100 or go below 0
+        self.happiness = min(self.happiness, 100)
+        self.cleanliness = max(self.cleanliness, 0)
+        self.friendship = min(self.friendship, 100)
+        
+    def bathe(self):
+    # Bathe the skunk
+    # Update cleanliness and health
+        self.cleanliness += 4  # Increase cleanliness by 4%
+        self.health += 4  # Increase health by 4%
+        
+        # Ensure cleanliness and health don't exceed 100
+        self.cleanliness = min(self.cleanliness, 100)
+        self.health = min(self.health, 100)
+
+
+
+def main():
+    clock = pygame.time.Clock()
+
+    aunthouse_image = pygame.image.load("aunthouse.jpeg")
+    aunthouse_image = pygame.transform.scale(aunthouse_image, (screen_width, screen_height))
+    boundaries_rect = pygame.Rect(300, 330, 180, 250)
+
+    skunk = Skunk("pet_skunk.png", screen_width)
+
+    menu_font = pygame.font.SysFont(None, 24)
+    menu_displayed = False
+
+    last_stat_update_time = pygame.time.get_ticks()  # Track the last time stats were updated
+
+    while True:
+        current_time = pygame.time.get_ticks()
+
+        # Check if it's time to update the stats (every 4 seconds)
+        if current_time - last_stat_update_time >= 4000:
+            # Update the stats
+            skunk.happiness -= 5
+            skunk.cleanliness -= 5
+            skunk.health -= 5
+            skunk.hunger -= 5
+            skunk.friendship -= 5
+
+            # Ensure stats don't go below 0
+            skunk.happiness = max(skunk.happiness, 0)
+            skunk.cleanliness = max(skunk.cleanliness, 0)
+            skunk.health = max(skunk.health, 0)
+            skunk.hunger = max(skunk.hunger, 0)
+            skunk.friendship = max(skunk.friendship, 0)
+
+            # Update the last stat update time
+            last_stat_update_time = current_time
+
+                # Inside the main loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if skunk.is_clicked(mouse_pos):
+                    # Skunk is clicked
+                    skunk.moving = False  # Stop skunk movement
+                    if not menu_displayed:
+                        print("Displaying menu")
+                        menu_options, menu_rect = display_menu(screen, menu_font, mouse_pos)  # Get menu options and menu rectangle
+                        menu_displayed = True
+                    else:
+                        menu_displayed = False
+                        skunk.moving = True  # Resume skunk movement when menu is closed
+                elif menu_displayed:
+                    # Check if any menu option is clicked
+                    if menu_rect.collidepoint(mouse_pos):
+                        selected_option_index = (mouse_pos[1] - menu_rect.top) // 30
+                        selected_option = menu_options[selected_option_index]
+                        if selected_option == "BATHE":
+                            skunk.bathe()  # Bathe the skunk
+                        elif selected_option == "FEED":
+                            skunk.feed()  # Feed the skunk
+                        elif selected_option == "PLAY":
+                            skunk.play()  # Play with the skunk
+                        elif selected_option == "TALK":
+                            skunk.talk()  # Talk to the skunk
+                        elif selected_option == "STROKE":
+                            skunk.stroke()  # Stroke the skunk
+
+        screen.fill(BLACK)
+        screen.blit(aunthouse_image, (0, 0))
+
+        # Update skunk
+        skunk.update(boundaries_rect)
+        skunk.draw(screen)
+
+        if menu_displayed:
+            display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery))
+
+        # Update the display of stats
+        display_stats(screen, menu_font, skunk)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+def display_menu(screen, font, position):
+    menu_options = ["TALK", "FEED", "PLAY", "BATHE", "STROKE"]
+
+    menu_height = len(menu_options) * 30
+    menu_width = 150
+    menu_rect = pygame.Rect(0, 0, menu_width, menu_height)
+
+    # Offset the menu position from the skunk's position
+    menu_rect.centerx = position[0] + 25  # Offset horizontally
+    menu_rect.centery = (position[1] - menu_height // 2) - 50  # Offset vertically
+
+    # Draw semi-transparent white background for the menu
+    menu_surface = pygame.Surface((menu_width, menu_height))
+    menu_surface.set_alpha(200)  # Set transparency (0-255)
+    menu_surface.fill(WHITE)
+    screen.blit(menu_surface, menu_rect)
+
+    for i, option in enumerate(menu_options):
+        text = font.render(option, True, BLACK)
+        text_rect = text.get_rect(center=(menu_rect.centerx, menu_rect.top + i * 30 + 15))
+        screen.blit(text, text_rect)
+
+    return menu_options, menu_rect  # Return menu options and menu rectangle
+
+
+
+
+def display_stats(screen, font, skunk):
+    # Define the stats text
+    stats_text = [
+        f"Happiness: {skunk.happiness}%",
+        f"Cleanliness: {skunk.cleanliness}%",
+        f"Health: {skunk.health}%",
+        f"Hunger: {skunk.hunger}%",
+        f"Friendship: {skunk.friendship}%"
+    ]
+
+    # Calculate the dimensions of the brown box
+    box_width = 160
+    box_height = len(stats_text) * 20 + 10  # Adjust height based on number of stats
+    box_left = 65
+    box_top = 60
+
+    # Draw the dark brown border
+    border_rect = pygame.Rect(box_left, box_top, box_width, box_height)
+    pygame.draw.rect(screen, (60, 30, 10), border_rect, 3)  # Increased border thickness
+
+    # Draw the brown box
+    box_rect = pygame.Rect(box_left + 3, box_top + 3, box_width - 6, box_height - 6)  # Adjusted inner box position
+    pygame.draw.rect(screen, (139, 69, 19), box_rect)
+
+    # Display stats text in brighter tan color
+    tan_color = (240, 200, 160)  # Brighter tan color RGB values
+
+
+    y = 70  # Initial y position
+    for stat in stats_text:
+        text_surface = font.render(stat, True, tan_color)
+        text_rect = text_surface.get_rect(left=70, top=y)  # Adjusted x position
+        screen.blit(text_surface, text_rect)
+        y += 20  # Increment y position for the next stat
+
+
+if __name__ == "__main__":
+    main()
