@@ -123,7 +123,6 @@ class Skunk(pygame.sprite.Sprite):
         self.health = min(self.health, 100)
 
 
-
 def aim_message(screen):
     # Font settings
     font = pygame.font.SysFont(None, 26)
@@ -132,93 +131,67 @@ def aim_message(screen):
     skunk_message = "He doesn't like you very much."
     third_message = "Figure out how to fix that."
     # Calculate text size and position
-    box_width = 400
-    box_height = 20
+    box_width = 450
+    box_height = 30
     box_left = (screen_width - box_width) // 2
     box_top = 70  # Adjusted to display the message at the top
     # Create a surface for the message box
     message_box_surface = pygame.Surface((box_width, box_height))
     message_box_surface.fill((139, 69, 19))  # Brown color
-    # Typewriter effect for the first message
-    current_message = breezy_message
-    typing_done = False
-    displayed_text = ""
-    while not typing_done:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                typing_done = True
-        displayed_text = current_message
-        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
-        text_width, text_height = text_surface.get_size()
-        # Render the message onto the message box surface
-        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
-        # Draw the message box onto the screen with thicker border
-        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
-        screen.blit(message_box_surface, (box_left, box_top))
-        # Update the display
-        pygame.display.flip()
-        # Pause briefly to simulate typewriter effect
-        pygame.time.wait(50)  # Adjust the wait time as needed
-    # Typewriter effect for the second message
-    current_message = skunk_message
-    displayed_text = ""
-    typing_done = False
     
-    while current_message:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                typing_done = True  # Exit function when a key is pressed
-        displayed_text += current_message[0]
-        current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
-        text_width, text_height = text_surface.get_size()
-        # Render the message onto the message box surface
-        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
-        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
-        # Draw the message box onto the screen with thicker border
-        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
-        screen.blit(message_box_surface, (box_left, box_top))
-        # Update the display
-        pygame.display.flip()
-        # Pause briefly to simulate typewriter effect
-        pygame.time.wait(50)  # Adjust the wait time as needed
+    messages = [breezy_message, skunk_message, third_message]
+    current_message_index = 0
+    
+    # Typewriter effect loop
+    while current_message_index < len(messages):
+        current_message = messages[current_message_index]
+        displayed_text = ""
+        typing_done = False
         
-        if typing_done:
-            break  # Exit the loop if typing is done
-    
-    # Wait for a key press before transitioning to the third message
-    key_pressed = False
-    while not key_pressed:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                key_pressed = True
-    # Typewriter effect for the third message
-    current_message = third_message
-    displayed_text = ""
-    while current_message:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                return  # Exit function when a key is pressed
-        displayed_text += current_message[0]
-        current_message = current_message[1:]
-        text_surface = font.render(displayed_text, True, (240, 200, 160))  # Bright tan color
-        text_width, text_height = text_surface.get_size()
-        # Render the message onto the message box surface
-        message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
-        message_box_surface.blit(text_surface, ((box_width - text_width) // 2, (box_height - text_height) // 2))
-        # Draw the message box onto the screen with thicker border
-        pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
-        screen.blit(message_box_surface, (box_left, box_top))
-        # Update the display
-        pygame.display.flip()
-        # Pause briefly to simulate typewriter effect
-        pygame.time.wait(50)  # Adjust the wait time as needed
-    # Wait for a key press before the function exits
-    key_pressed = False
-    while not key_pressed:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                key_pressed = True
+        while not typing_done:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    typing_done = True
+            
+            # Add characters one by one to displayed_text
+            displayed_text += current_message[len(displayed_text)]
+            
+            # Render the displayed text with typewriter effect
+            rendered_text = font.render(displayed_text, True, (240, 200, 160))
+            text_width, text_height = rendered_text.get_size()
+            
+            # Clear the message box surface
+            message_box_surface.fill((139, 69, 19))  # Change color to brown for skunk message
+            
+            # Render the message onto the message box surface
+            message_box_surface.blit(rendered_text, ((box_width - text_width) // 2, (box_height - text_height) // 2))
+            
+            # Draw the message box onto the screen with thicker border
+            pygame.draw.rect(screen, (60, 30, 10), (box_left, box_top, box_width, box_height), 3)
+            screen.blit(message_box_surface, (box_left, box_top))
+            
+            # Update the display
+            pygame.display.flip()
+            
+            # Pause briefly to simulate typewriter effect
+            pygame.time.wait(50)  # Adjust the wait time as needed
+            
+            # Check if typing is done
+            if len(displayed_text) == len(current_message):
+                typing_done = True
+        
+        # Wait for a key press before transitioning to the next message
+        key_pressed = False
+        while not key_pressed:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    key_pressed = True
+        
+        # Move to the next message
+        current_message_index += 1
+
+
+
 def main():
     clock = pygame.time.Clock()
     
@@ -266,7 +239,7 @@ def main():
             # Update the last stat update time
             last_stat_update_time = current_time
 
-                # Inside the main loop
+        # Inside the main loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -302,29 +275,25 @@ def main():
         screen.fill(BLACK)
         screen.blit(aunthouse_image, (0, 0))
         
+        # Update skunk
         skunk.update(boundaries_rect)
         skunk.draw(screen)
-        
+
         if not aim_message_displayed:
             aim_message(screen)
             aim_message_displayed = True
 
-        # Update skunk
-        skunk.update(boundaries_rect)
-        skunk.draw(screen)
-        
-        if not aim_message_displayed:
-            aim_message(screen)
-            aim_message_displayed = True
+        if aim_message_displayed:
+            if not menu_displayed:
+                display_stats(screen, menu_font, skunk)
 
         if menu_displayed:
             display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery))
 
-        # Update the display of stats
-        display_stats(screen, menu_font, skunk)
-
         pygame.display.flip()
         clock.tick(60)
+
+
 
 def display_menu(screen, font, position):
     menu_options = ["TALK", "FEED", "PLAY", "BATHE", "STROKE"]
