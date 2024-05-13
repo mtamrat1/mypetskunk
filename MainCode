@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 # Initialize Pygame
 pygame.init()
@@ -189,6 +190,143 @@ def aim_message(screen):
         
         # Move to the next message
         current_message_index += 1
+        
+def launch_mini_game():
+    pygame.init()
+
+    # Set up the screen
+    WIDTH, HEIGHT = 800, 600
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Get Breezy!")
+
+    # Brown color
+    BROWN = (139, 69, 19)
+
+    # Load images
+    skunk_img = pygame.image.load("pet_skunk.png")
+    skunk_img = pygame.transform.scale(skunk_img, (100, 100))
+    carrier_img = pygame.image.load("pet_carrier.png")
+    carrier_img = pygame.transform.scale(carrier_img, (100, 100))
+    hand_img = pygame.image.load("cartoon_hand.png")
+    hand_img = pygame.transform.scale(hand_img, (100, 100))
+
+    # Calculate initial positions of skunk and carrier
+    skunk_corner_distance = ((WIDTH - 100) ** 2 + (HEIGHT - 100) ** 2) ** 0.5
+    skunk_corner_margin = 50  # Margin to ensure the skunk doesn't start too close to the corner
+    if skunk_corner_distance > skunk_corner_margin:
+        corner_margin_ratio = skunk_corner_margin / skunk_corner_distance
+        skunk_x = random.randint(int((WIDTH - 100) * corner_margin_ratio), int((WIDTH - 100) * (1 - corner_margin_ratio)))
+        skunk_y = random.randint(int((HEIGHT - 100) * corner_margin_ratio), int((HEIGHT - 100) * (1 - corner_margin_ratio)))
+    else:
+        skunk_x = WIDTH // 2 - 50
+        skunk_y = HEIGHT // 2 - 50
+
+    # Calculate carrier position opposite to skunk, ensuring it doesn't start in the top-left corner
+    if skunk_x == 0 and skunk_y == 0:  # If skunk starts in the top-left corner
+        carrier_x = random.randint(100, WIDTH - 100)  # Randomize carrier position in X-axis
+        carrier_y = random.randint(100, HEIGHT - 100)  # Randomize carrier position in Y-axis
+    else:
+        carrier_x = random.randint(0, WIDTH - 100)  # Randomize carrier position in X-axis
+        carrier_y = random.randint(0, HEIGHT - 100)  # Randomize carrier position in Y-axis
+
+    player_x = WIDTH // 2
+    player_y = HEIGHT // 2
+    player_speed = 5
+    skunk_speed = 2
+    time_remaining = 30
+    font = pygame.font.Font(None, 36)
+
+    # Display instructions
+    instructions_font = pygame.font.Font(None, 24)
+    instructions_text = instructions_font.render("Use arrow keys to move your hand. Get Breezy into his carrier before time runs out!", True, (0, 0, 0))
+    instructions_rect = instructions_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+
+    # Main game loop
+    show_instructions = True
+    game_started = False
+    running = True
+    clock = pygame.time.Clock()
+    while running:
+        screen.fill(BROWN)  # Set background color to brown
+
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN and not game_started:
+                show_instructions = False
+                game_started = True
+
+        if show_instructions:
+            screen.blit(instructions_text, instructions_rect)
+        else:
+            # Handle player input
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                player_x -= player_speed
+            if keys[pygame.K_RIGHT]:
+                player_x += player_speed
+            if keys[pygame.K_UP]:
+                player_y -= player_speed
+            if keys[pygame.K_DOWN]:
+                player_y += player_speed
+
+            # Ensure player stays within the screen bounds
+            player_x = max(0, min(player_x, WIDTH - 100))
+            player_y = max(0, min(player_y, HEIGHT - 100))
+
+            # Draw skunk, carrier, and player
+            screen.blit(skunk_img, (skunk_x, skunk_y))
+            screen.blit(carrier_img, (carrier_x, carrier_y))
+            screen.blit(hand_img, (player_x, player_y))
+
+            # Move skunk away from player if player collides with skunk
+            player_rect = pygame.Rect(player_x, player_y, 100, 100)
+            skunk_rect = pygame.Rect(skunk_x, skunk_y, 100, 100)
+            if player_rect.colliderect(skunk_rect):
+                dx = skunk_x - player_x
+                dy = skunk_y - player_y
+                distance = ((dx ** 2) + (dy ** 2)) ** 0.5
+                if distance != 0:
+                    skunk_x += skunk_speed * dx / distance
+                    skunk_y += skunk_speed * dy / distance
+
+            # Check if skunk is about to move off-screen and adjust its position
+            skunk_x = max(0, min(skunk_x, WIDTH - 100))
+            skunk_y = max(0, min(skunk_y, HEIGHT - 100))
+
+            # Check if player puts the skunk mostly in the carrier
+            if (skunk_x + 30 >= carrier_x and skunk_x + 70 <= carrier_x + 100 and
+                    skunk_y + 30 >= carrier_y and skunk_y + 70 <= carrier_y + 100):
+                running = False
+
+            # Display time remaining
+            time_remaining -= clock.tick(60) / 1000  # Decrease time remaining by elapsed time
+            text = font.render(f"Time Remaining: {max(0, int(time_remaining))}", True, (0, 0, 0))
+            screen.blit(text, (10, 10))
+
+            # Check if time runs out
+            if time_remaining <= 0:
+                running = False
+
+        pygame.display.flip()
+
+    # Game over
+    screen.fill(BROWN)  # Set background color to brown
+    if (skunk_x + 30 >= carrier_x and skunk_x + 70 <= carrier_x + 100 and
+            skunk_y + 30 >= carrier_y and skunk_y + 70 <= carrier_y + 100):
+        text = font.render("You caught the skunk!", True, (0, 0, 0))
+    else:
+        text = font.render("Time's up! You didn't catch the skunk.", True, (0, 0, 0))
+    screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
+    pygame.display.flip()
+
+    # Wait for a moment before closing the game
+    pygame.time.wait(3000)
+
+    # Quit Pygame
+    pygame.quit()
+    sys.exit()
 
 
 
@@ -221,7 +359,7 @@ def main():
         current_time = pygame.time.get_ticks()
 
         # Check if it's time to update the stats (every 4 seconds)
-        if current_time - last_stat_update_time >= 1000:
+        if current_time - last_stat_update_time >= 4000:
             # Update the stats
             skunk.happiness -= 5
             skunk.cleanliness -= 5
@@ -239,8 +377,40 @@ def main():
             # Update the last stat update time
             last_stat_update_time = current_time
 
+        # Check if skunk's friendship reaches 100%
+        if skunk.friendship >= 100:
+            # Display special dialogue
+            special_dialogue = [
+                "WOW! You did it! Breezy loves you now!",
+                "Time to get him in your car and drive him home."
+            ]
+            display_dialogue(screen, special_dialogue)
+            
+            # Prompt the player to launch the mini-game
+            mini_game_prompt = [
+                "Press SPACE to put Breezy into his carrier."
+            ]
+            display_dialogue(screen, mini_game_prompt)
+
+            # Wait for the player to press SPACE to start the mini-game
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            waiting = False
+
+            # Start the mini-game
+            launch_mini_game()
+
         # Inside the main loop
         for event in pygame.event.get():
+            # Handle events
+            # Handle other events
+
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -274,11 +444,11 @@ def main():
 
         screen.fill(BLACK)
         screen.blit(aunthouse_image, (0, 0))
-        
+
         # Update skunk
         skunk.update(boundaries_rect)
         skunk.draw(screen)
-
+        
         if not aim_message_displayed:
             aim_message(screen)
             aim_message_displayed = True
@@ -286,9 +456,11 @@ def main():
         if aim_message_displayed:
             if not menu_displayed:
                 display_stats(screen, menu_font, skunk)
-
         if menu_displayed:
             display_menu(screen, menu_font, (skunk.rect.centerx, skunk.rect.centery))
+
+        # Update the display of stats
+        display_stats(screen, menu_font, skunk)
 
         pygame.display.flip()
         clock.tick(60)
